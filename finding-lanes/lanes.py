@@ -13,20 +13,26 @@ def make_coordinates(image, line_parameters):
 def average_slope_intercept(image, lines):
     left_fit = []
     right_fit = []
+    if lines is None:
+        return None
     for line in lines:
         x1, y1, x2, y2 = line.reshape(4)
-        parameters = np.polyfit((x1, x2), (y1, y2), 1)
+        parameters = np.polyfit((x1,x2), (y1,y2), 1)
         slope = parameters[0]
         intercept = parameters[1]
         if slope < 0:
-            left_fit.append((slope, intercept))
+            global left_line
+            left_fit.append((slope,intercept))
+            left_fit_average = np.average(left_fit, axis=0)
+            left_line = make_coordinates(image, left_fit_average)
         else:
-            right_fit.append((slope, intercept))
-    left_fit_average = np.average(left_fit, axis=0)
+            right_fit.append((slope,intercept))
     right_fit_average = np.average(right_fit, axis=0)
-    left_line = make_coordinates(image, left_fit_average)
     right_line = make_coordinates(image, right_fit_average)
-    return np.array([left_line, right_line])
+    if left_line is not None:
+        return np.array([left_line, right_line])
+    else:
+        return np.array([right_line])
 
 def canny(image):
     # Step 1 Make image grayscale so there is only 1 channel instead of 3
@@ -69,4 +75,7 @@ while(cap.isOpened()):
     combo_image = cv2.addWeighted(frame, 0.8, line_image, 1, 1)
 
     cv2.imshow('results', combo_image)
-    cv2.waitKey(1)
+    if cv2.waitKey(1) == ord('q'):
+        break
+cap.release()
+cv2.destroyAllWindows()
