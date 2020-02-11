@@ -29,6 +29,7 @@ def average_slope_intercept(image, lines):
             right_fit.append((slope,intercept))
     right_fit_average = np.average(right_fit, axis=0)
     right_line = make_coordinates(image, right_fit_average)
+
     if left_line is not None:
         return np.array([left_line, right_line])
     else:
